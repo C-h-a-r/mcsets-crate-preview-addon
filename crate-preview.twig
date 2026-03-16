@@ -1,0 +1,502 @@
+{# ============================================================ #}
+{#                     TWIG CONFIGURATION                       #}
+{# ============================================================ #}
+
+{# Active theme: 'minecraft' or 'sleek' #}
+{% set active_theme = 'sleek' %}
+
+{# ------------------------------------------------------------ #}
+{#  Empty slot item — shown in all blank/border cells           #}
+{#  Set to null for plain empty cells, or an item name string   #}
+{#  e.g. "dirt", "stone", "glass"                               #}
+{# ------------------------------------------------------------ #}
+{% set empty_slot = null %}
+
+{# ------------------------------------------------------------ #}
+{#  Global colour overrides — these apply regardless of theme   #}
+{#  Set to null to fall back to the theme's default             #}
+{# ------------------------------------------------------------ #}
+{% set color_bg_panel       = null %}
+{% set color_bg_cell        = null %}
+{% set color_bg_cell_hover  = null %}
+{% set color_bg_tooltip     = null %}
+{% set color_text_tooltip   = null %}
+{% set color_border_cell    = null %}
+{% set color_border_tooltip = null %}
+{% set color_text_count     = null %}
+
+
+{# ============================================================ #}
+{#                         ITEM DATA                            #}
+{#                                                              #}
+{#  One item per line. Supported attributes:                    #}
+{#    @name="..."         Display name (required)               #}
+{#    @item="..."         Item ID for API lookup                #}
+{#                        Uses underscores: diamond_sword       #}
+{#    @img="..."          Custom image URL (overrides @item)    #}
+{#    @quantity="<int>"   Stack count shown bottom-right        #}
+{#    @lore="..."         Italic lore line(s) in tooltip        #}
+{#    @description="..."  Description shown below lore          #}
+{#    @enchanted          Adds enchantment glint to item image  #}
+{#                        (no value needed, just the flag)      #}
+{#                                                              #}
+{#  Use \n inside any value for line breaks                     #}
+{# ============================================================ #}
+
+{% set raw_items %}
+@name="Diamond Sword"@item="diamond_sword"@quantity="1"@lore="Sharpness V\nUnbreaking III"@description="A finely crafted blade."@enchanted
+@name="Diamond"@item="diamond"@quantity="23"@lore="Precious gem"
+@name="Iron Ingot"@item="iron_ingot"@quantity="64"
+@name="Apple"@item="apple"@quantity="5"@lore="Restores 4 hunger"@description="A crisp red apple."
+@name="Bow"@item="bow"@quantity="1"@lore="Power IV\nFlame I"@enchanted
+@name="Arrow"@item="arrow"@quantity="32"
+@name="Torch"@item="torch"@quantity="18"@description="Keeps the dark at bay."
+@name="Cooked Beef"@item="cooked_beef"@quantity="8"@lore="Restores 8 hunger"
+@name="Enchanted Book"@item="enchanted_book"@quantity="2"@lore="Fortune III"@description="Stores a powerful enchantment."@enchanted
+@name="Ender Pearl"@item="ender_pearl"@quantity="7"@lore="Teleports on throw"
+@name="Gold Ingot"@item="gold_ingot"@quantity="12"
+@name="Redstone"@item="redstone"@quantity="64"@description="Used in redstone circuits."
+@name="Emerald"@item="emerald"@quantity="3"@lore="Currency of villagers"
+@name="Gravel"@item="gravel"@quantity="64"
+@name="Bone"@item="bone"@quantity="9"@lore="Can tame wolves"
+{% endset %}
+
+
+{# ============================================================ #}
+{#                      THEME DEFAULTS                          #}
+{# ============================================================ #}
+
+{% if active_theme == 'minecraft' %}
+
+    {% set theme = {
+        font_url:             "https://fonts.googleapis.com/css2?family=VT323&display=swap",
+        font_family:          "'VT323', monospace",
+
+        panel_bg:             "#c6c6c6",
+        panel_border_top:     "3px solid #ffffff",
+        panel_border_left:    "3px solid #ffffff",
+        panel_border_right:   "3px solid #555555",
+        panel_border_bottom:  "3px solid #555555",
+        panel_padding:        "14px 16px 16px",
+        panel_shadow:         "3px 3px 0 #000, inset -1px -1px 0 #888, inset 1px 1px 0 #fff",
+        panel_radius:         "0px",
+
+        cell_size:            "40px",
+        cell_gap:             "4px",
+        cell_bg:              "#8b8b8b",
+        cell_hover_bg:        "#9f9f9f",
+        cell_hover_transform: "none",
+        cell_hover_shadow:    "none",
+        cell_border_top:      "2px solid #373737",
+        cell_border_left:     "2px solid #373737",
+        cell_border_right:    "2px solid #ffffff",
+        cell_border_bottom:   "2px solid #ffffff",
+        cell_radius:          "0px",
+
+        img_size:             "28px",
+
+        count_size:           "13px",
+        count_weight:         "400",
+        count_color:          "#ffffff",
+        count_shadow:         "1px 1px 0 #3f3f3f",
+
+        tooltip_bg:           "#100010",
+        tooltip_border:       "1px solid #2d0a63",
+        tooltip_text:         "#ffffff",
+        tooltip_lore_color:   "#aa88ff",
+        tooltip_desc_color:   "#aaaaaa",
+        tooltip_size:         "14px",
+        tooltip_weight:       "400",
+        tooltip_padding:      "6px 8px",
+        tooltip_text_shadow:  "1px 1px 0 #5a0060",
+        tooltip_shadow:       "2px 2px 0 #000",
+        tooltip_radius:       "0px",
+        tooltip_tracking:     "0px",
+        tooltip_arrow_color:  "#2d0a63",
+
+        items_per_row:        7,
+    } %}
+
+{% elseif active_theme == 'sleek' %}
+
+    {% set theme = {
+        font_url:             "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap",
+        font_family:          "'Inter', sans-serif",
+
+        panel_bg:             "#1e293b",
+        panel_border_top:     "1px solid #334155",
+        panel_border_left:    "1px solid #334155",
+        panel_border_right:   "1px solid #334155",
+        panel_border_bottom:  "1px solid #334155",
+        panel_padding:        "20px",
+        panel_shadow:         "0 25px 50px rgba(0,0,0,0.6)",
+        panel_radius:         "16px",
+
+        cell_size:            "44px",
+        cell_gap:             "6px",
+        cell_bg:              "#0f172a",
+        cell_hover_bg:        "#1e3a5f",
+        cell_hover_transform: "scale(1.05)",
+        cell_hover_shadow:    "0 4px 12px rgba(0,0,0,0.4)",
+        cell_border_top:      "1px solid #334155",
+        cell_border_left:     "1px solid #334155",
+        cell_border_right:    "1px solid #334155",
+        cell_border_bottom:   "1px solid #334155",
+        cell_radius:          "8px",
+
+        img_size:             "30px",
+
+        count_size:           "11px",
+        count_weight:         "600",
+        count_color:          "#94a3b8",
+        count_shadow:         "none",
+
+        tooltip_bg:           "#1e293b",
+        tooltip_border:       "1px solid #475569",
+        tooltip_text:         "#f1f5f9",
+        tooltip_lore_color:   "#a78bfa",
+        tooltip_desc_color:   "#64748b",
+        tooltip_size:         "12px",
+        tooltip_weight:       "500",
+        tooltip_padding:      "8px 12px",
+        tooltip_text_shadow:  "none",
+        tooltip_shadow:       "0 8px 24px rgba(0,0,0,0.5)",
+        tooltip_radius:       "6px",
+        tooltip_tracking:     "0.02em",
+        tooltip_arrow_color:  "#475569",
+
+        items_per_row:        7,
+    } %}
+
+{% endif %}
+
+
+{# ============================================================ #}
+{#         APPLY GLOBAL OVERRIDES OVER THEME DEFAULTS           #}
+{# ============================================================ #}
+
+{% set bg_panel      = color_bg_panel       ?? theme.panel_bg %}
+{% set bg_cell       = color_bg_cell        ?? theme.cell_bg %}
+{% set bg_cell_hover = color_bg_cell_hover  ?? theme.cell_hover_bg %}
+{% set bg_tooltip    = color_bg_tooltip     ?? theme.tooltip_bg %}
+{% set text_tooltip  = color_text_tooltip   ?? theme.tooltip_text %}
+{% set text_count    = color_text_count     ?? theme.count_color %}
+
+{% if color_border_cell %}
+    {% set cell_border_top    = "1px solid " ~ color_border_cell %}
+    {% set cell_border_left   = "1px solid " ~ color_border_cell %}
+    {% set cell_border_right  = "1px solid " ~ color_border_cell %}
+    {% set cell_border_bottom = "1px solid " ~ color_border_cell %}
+{% else %}
+    {% set cell_border_top    = theme.cell_border_top %}
+    {% set cell_border_left   = theme.cell_border_left %}
+    {% set cell_border_right  = theme.cell_border_right %}
+    {% set cell_border_bottom = theme.cell_border_bottom %}
+{% endif %}
+
+{% set tooltip_border      = color_border_tooltip ? "1px solid " ~ color_border_tooltip : theme.tooltip_border %}
+{% set tooltip_arrow_color = color_border_tooltip ?? theme.tooltip_arrow_color %}
+
+
+{# ============================================================ #}
+{#                     PARSE ITEMS                              #}
+{# ============================================================ #}
+
+{% set items = [] %}
+{% for line in raw_items|split('\n') %}
+    {% set line = line|trim %}
+    {% if line starts with '@' %}
+
+        {% set item_name      = '' %}
+        {% set item_img       = '' %}
+        {% set item_url       = '' %}
+        {% set item_qty       = '' %}
+        {% set item_lore      = '' %}
+        {% set item_desc      = '' %}
+        {% set item_enchanted = '@enchanted' in line %}
+
+        {% if '@name="' in line %}
+            {% set item_name = line|split('@name="')[1]|split('"')[0] %}
+        {% endif %}
+
+        {% if '@item="' in line %}
+            {% set item_img = line|split('@item="')[1]|split('"')[0] %}
+        {% endif %}
+
+        {% if '@img="' in line %}
+            {% set item_url = line|split('@img="')[1]|split('"')[0] %}
+        {% endif %}
+
+        {% if '@quantity="' in line %}
+            {% set item_qty = line|split('@quantity="')[1]|split('"')[0] %}
+        {% endif %}
+
+        {% if '@lore="' in line %}
+            {% set item_lore = line|split('@lore="')[1]|split('"')[0] %}
+        {% endif %}
+
+        {% if '@description="' in line %}
+            {% set item_desc = line|split('@description="')[1]|split('"')[0] %}
+        {% endif %}
+
+        {% if item_name %}
+            {% set items = items|merge([{
+                name:      item_name,
+                img:       item_img,
+                url:       item_url,
+                quantity:  item_qty,
+                lore:      item_lore,
+                desc:      item_desc,
+                enchanted: item_enchanted,
+            }]) %}
+        {% endif %}
+
+    {% endif %}
+{% endfor %}
+
+
+{# ============================================================ #}
+{#                          STYLES                              #}
+{# ============================================================ #}
+
+<link rel="stylesheet" href="{{ theme.font_url }}">
+
+<style>
+    .inv-panel {
+        display:        inline-block;
+        background:     {{ bg_panel }};
+        border-top:     {{ theme.panel_border_top }};
+        border-left:    {{ theme.panel_border_left }};
+        border-right:   {{ theme.panel_border_right }};
+        border-bottom:  {{ theme.panel_border_bottom }};
+        padding:        {{ theme.panel_padding }};
+        box-shadow:     {{ theme.panel_shadow }};
+        border-radius:  {{ theme.panel_radius }};
+        font-family:    {{ theme.font_family }};
+    }
+
+    .inv-grid {
+        display:        flex;
+        flex-direction: column;
+        gap:            {{ theme.cell_gap }};
+    }
+
+    .inv-row {
+        display: flex;
+        gap:     {{ theme.cell_gap }};
+    }
+
+    .inv-cell {
+        width:           {{ theme.cell_size }};
+        height:          {{ theme.cell_size }};
+        background:      {{ bg_cell }};
+        border-top:      {{ cell_border_top }};
+        border-left:     {{ cell_border_left }};
+        border-right:    {{ cell_border_right }};
+        border-bottom:   {{ cell_border_bottom }};
+        border-radius:   {{ theme.cell_radius }};
+        box-sizing:      border-box;
+        display:         flex;
+        align-items:     center;
+        justify-content: center;
+        position:        relative;
+        cursor:          default;
+        transition:      background 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+
+    .inv-cell.item-slot {
+        cursor: pointer;
+    }
+
+    .inv-cell.item-slot:hover {
+        background: {{ bg_cell_hover }};
+        transform:  {{ theme.cell_hover_transform }};
+        box-shadow: {{ theme.cell_hover_shadow }};
+    }
+
+    .inv-cell.item-slot:hover .inv-tooltip {
+        display: block;
+    }
+
+    .inv-item-img {
+        width:           {{ theme.img_size }};
+        height:          {{ theme.img_size }};
+        image-rendering: pixelated;
+        display:         block;
+        pointer-events:  none;
+    }
+
+    .inv-item-img.empty-slot-img {
+        opacity: 0.3;
+    }
+
+    .inv-count {
+        position:    absolute;
+        bottom:      2px;
+        right:       3px;
+        font-size:   {{ theme.count_size }};
+        font-family: {{ theme.font_family }};
+        font-weight: {{ theme.count_weight }};
+        color:       {{ text_count }};
+        text-shadow: {{ theme.count_shadow }};
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .inv-tooltip {
+        display:        none;
+        position:       absolute;
+        bottom:         calc(100% + 8px);
+        left:           50%;
+        transform:      translateX(-50%);
+        background:     {{ bg_tooltip }};
+        border:         {{ tooltip_border }};
+        font-size:      {{ theme.tooltip_size }};
+        font-family:    {{ theme.font_family }};
+        font-weight:    {{ theme.tooltip_weight }};
+        padding:        {{ theme.tooltip_padding }};
+        white-space:    nowrap;
+        z-index:        99;
+        pointer-events: none;
+        box-shadow:     {{ theme.tooltip_shadow }};
+        border-radius:  {{ theme.tooltip_radius }};
+        letter-spacing: {{ theme.tooltip_tracking }};
+        min-width:      120px;
+    }
+
+    .inv-tooltip::after {
+        content:   '';
+        position:  absolute;
+        top:       100%;
+        left:      50%;
+        transform: translateX(-50%);
+        border:    5px solid transparent;
+        border-top-color: {{ tooltip_arrow_color }};
+    }
+
+    .inv-tooltip-name {
+        color:       {{ text_tooltip }};
+        text-shadow: {{ theme.tooltip_text_shadow }};
+        font-weight: {{ theme.tooltip_weight }};
+        display:     block;
+        white-space: nowrap;
+    }
+
+    .inv-tooltip-lore {
+        color:       {{ theme.tooltip_lore_color }};
+        font-style:  italic;
+        font-size:   0.9em;
+        margin-top:  4px;
+        display:     block;
+        white-space: pre;
+    }
+
+    .inv-tooltip-desc {
+        color:       {{ theme.tooltip_desc_color }};
+        font-size:   0.85em;
+        margin-top:  5px;
+        display:     block;
+        white-space: pre;
+        border-top:  1px solid {{ tooltip_arrow_color }};
+        padding-top: 5px;
+    }
+</style>
+
+
+{# ============================================================ #}
+{#                          MARKUP                              #}
+{# ============================================================ #}
+
+{% set cols     = theme.items_per_row %}
+{% set total    = items|length %}
+{% set num_rows = (total / cols)|round(0, 'ceil') %}
+
+{% macro empty_cell(empty_slot) %}
+    <div class="inv-cell">
+        {% if empty_slot %}
+            <img
+                class="inv-item-img empty-slot-img"
+                src="https://api.minecraftitems.xyz/api/item/{{ empty_slot }}"
+                alt=""
+            >
+        {% endif %}
+    </div>
+{% endmacro %}
+
+<div class="inv-panel">
+    <div class="inv-grid">
+
+        {# Top blank row #}
+        <div class="inv-row">
+            {% for i in 1..(cols + 2) %}
+                {{ _self.empty_cell(empty_slot) }}
+            {% endfor %}
+        </div>
+
+        {# Item rows #}
+        {% for r in 0..(num_rows - 1) %}
+            <div class="inv-row">
+
+                {# Left border cell #}
+                {{ _self.empty_cell(empty_slot) }}
+
+                {% for c in 0..(cols - 1) %}
+                    {% set idx  = r * cols + c %}
+                    {% set item = items[idx] ?? null %}
+
+                    {% if item %}
+
+                        {# Build image src — custom URL takes priority over API  #}
+                        {# Append ?glint=true if @enchanted flag is present      #}
+                        {% if item.url %}
+                            {% set img_src = item.url ~ (item.enchanted ? '?glint=true' : '') %}
+                        {% else %}
+                            {% set img_src = 'https://api.minecraftitems.xyz/api/item/' ~ item.img ~ (item.enchanted ? '?glint=true' : '') %}
+                        {% endif %}
+
+                        <div class="inv-cell item-slot">
+
+                            <img
+                                class="inv-item-img"
+                                src="{{ img_src }}"
+                                alt="{{ item.name }}"
+                            >
+
+                            {# Stack count #}
+                            {% if item.quantity > 1 %}
+                                <span class="inv-count">{{ item.quantity }}</span>
+                            {% endif %}
+
+                            {# Tooltip #}
+                            <div class="inv-tooltip">
+                                <span class="inv-tooltip-name">{{ item.name }}</span>
+                                {% if item.lore %}
+                                    <span class="inv-tooltip-lore">{{ item.lore|replace({'\\n': "\n"}) }}</span>
+                                {% endif %}
+                                {% if item.desc %}
+                                    <span class="inv-tooltip-desc">{{ item.desc|replace({'\\n': "\n"}) }}</span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                    {% else %}
+                        {{ _self.empty_cell(empty_slot) }}
+                    {% endif %}
+                {% endfor %}
+
+                {# Right border cell #}
+                {{ _self.empty_cell(empty_slot) }}
+
+            </div>
+        {% endfor %}
+
+        {# Bottom blank row #}
+        <div class="inv-row">
+            {% for i in 1..(cols + 2) %}
+                {{ _self.empty_cell(empty_slot) }}
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
