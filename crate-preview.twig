@@ -10,25 +10,6 @@
         @crate-preview-builder:epic
         @crate-preview-builder:starter
         @crate-preview-builder:legendary
-
-    Each crate supports:
-        theme         'minecraft' or 'sleek'
-        empty_slot    null or item name e.g. "dirt"
-
-    Colour overrides (null = use theme default):
-        color_bg_panel, color_bg_cell, color_bg_cell_hover,
-        color_bg_tooltip, color_text_tooltip, color_border_cell,
-        color_border_tooltip, color_text_count
-
-    Item attributes:
-        @name="..."        Display name (required)
-        @item="..."        Item ID for API: diamond_sword
-        @img="..."         Custom image URL (overrides @item)
-        @quantity="<int>"  Stack count shown bottom-right
-        @lore="..."        Italic lore lines in tooltip
-        @description="..."  Description shown below lore
-        @enchanted         Adds ?glint=true to image URL
-    Use \n inside any value for line breaks
 #}
 
 {% set crates = {
@@ -111,127 +92,289 @@
 
 
 {# ============================================================ #}
-{#                     STYLES + JS                              #}
+{#                     THEME DEFINITIONS                        #}
+{# ============================================================ #}
+
+{% set themes = {
+
+    minecraft: {
+        font_url:             "https://fonts.googleapis.com/css2?family=VT323&display=swap",
+        font_family:          "'VT323', monospace",
+
+        panel_bg:             "#c6c6c6",
+        panel_padding:        "14px 16px 16px",
+        panel_radius:         "0px",
+        panel_shadow:         "3px 3px 0 #000, inset -1px -1px 0 #888, inset 1px 1px 0 #fff",
+        panel_border_top:     "3px solid #ffffff",
+        panel_border_left:    "3px solid #ffffff",
+        panel_border_right:   "3px solid #555555",
+        panel_border_bottom:  "3px solid #555555",
+
+        cell_size:            "40px",
+        cell_gap:             "4px",
+        cell_bg:              "#8b8b8b",
+        cell_hover_bg:        "#9f9f9f",
+        cell_hover_transform: "scale(1.05)",
+        cell_hover_shadow:    "none",
+        cell_radius:          "0px",
+        cell_border_top:      "2px solid #373737",
+        cell_border_left:     "2px solid #373737",
+        cell_border_right:    "2px solid #ffffff",
+        cell_border_bottom:   "2px solid #ffffff",
+
+        img_size:             "28px",
+        img_size_ratio:       "0.7",
+
+        count_size:           "13px",
+        count_weight:         "400",
+        count_color:          "#ffffff",
+        count_shadow:         "1px 1px 0 #3f3f3f",
+
+        tooltip_bg:           "#100010",
+        tooltip_border_width: "1px",
+        tooltip_border_style: "solid",
+        tooltip_border_color: "#2d0a63",
+        tooltip_radius:       "0px",
+        tooltip_padding:      "6px 8px",
+        tooltip_shadow:       "2px 2px 0 #000",
+        tooltip_text:         "#ffffff",
+        tooltip_lore_color:   "#aa88ff",
+        tooltip_desc_color:   "#aaaaaa",
+        tooltip_size:         "14px",
+        tooltip_weight:       "400",
+        tooltip_text_shadow:  "1px 1px 0 #5a0060",
+        tooltip_tracking:     "0px",
+
+        items_per_row:        7,
+    },
+
+    sleek: {
+        font_url:             "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap",
+        font_family:          "'Inter', sans-serif",
+
+        panel_bg:             "#1e293b",
+        panel_padding:        "20px",
+        panel_radius:         "16px",
+        panel_shadow:         "0 25px 50px rgba(0,0,0,0.6)",
+        panel_border_top:     "1px solid #334155",
+        panel_border_left:    "1px solid #334155",
+        panel_border_right:   "1px solid #334155",
+        panel_border_bottom:  "1px solid #334155",
+
+        cell_size:            "44px",
+        cell_gap:             "6px",
+        cell_bg:              "#0f172a",
+        cell_hover_bg:        "#1e3a5f",
+        cell_hover_transform: "scale(1.05)",
+        cell_hover_shadow:    "0 4px 12px rgba(0,0,0,0.4)",
+        cell_radius:          "8px",
+        cell_border_top:      "1px solid #334155",
+        cell_border_left:     "1px solid #334155",
+        cell_border_right:    "1px solid #334155",
+        cell_border_bottom:   "1px solid #334155",
+
+        img_size:             "30px",
+        img_size_ratio:       "0.68",
+
+        count_size:           "11px",
+        count_weight:         "600",
+        count_color:          "#94a3b8",
+        count_shadow:         "none",
+
+        tooltip_bg:           "#1e293b",
+        tooltip_border_width: "1px",
+        tooltip_border_style: "solid",
+        tooltip_border_color: "#475569",
+        tooltip_radius:       "6px",
+        tooltip_padding:      "8px 12px",
+        tooltip_shadow:       "0 8px 24px rgba(0,0,0,0.5)",
+        tooltip_text:         "#f1f5f9",
+        tooltip_lore_color:   "#a78bfa",
+        tooltip_desc_color:   "#64748b",
+        tooltip_size:         "12px",
+        tooltip_weight:       "500",
+        tooltip_text_shadow:  "none",
+        tooltip_tracking:     "0.02em",
+
+        items_per_row:        7,
+    },
+
+} %}
+
+
+{# ============================================================ #}
+{#                          STYLES                              #}
 {# ============================================================ #}
 
 <style>
-    .inv-cell.item-slot { cursor: pointer; }
-    .inv-cell.item-slot:hover .inv-tooltip { display: block !important; }
-    .inv-item-img { image-rendering: pixelated; display: block; pointer-events: none; }
-    .inv-item-img.empty-slot-img { opacity: 0.3; }
-    .inv-count { position: absolute; bottom: 2px; right: 3px; line-height: 1; pointer-events: none; }
-    .inv-tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); white-space: nowrap; z-index: 999; pointer-events: none; min-width: 120px; }
-    .inv-tooltip-name  { display: block; white-space: nowrap; }
-    .inv-tooltip-lore  { display: block; white-space: pre; font-style: italic; }
-    .inv-tooltip-desc  { display: block; white-space: pre; }
+    .crate-preview-outer {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .crate-inv-panel {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .crate-inv-grid {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .crate-inv-row {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+    }
+
+    .crate-inv-cell {
+        flex: 1 1 0;
+        min-width: 0;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: visible;
+        /* aspect-ratio keeps cells square */
+        aspect-ratio: 1 / 1;
+    }
+
+    .crate-inv-cell.item-slot {
+        cursor: pointer;
+    }
+
+    .crate-inv-cell.item-slot:hover .crate-inv-tooltip {
+        display: block !important;
+    }
+
+    .crate-inv-img {
+        image-rendering: pixelated;
+        display: block;
+        pointer-events: none;
+        /* image fills a ratio of the cell — set via inline style */
+    }
+
+    .crate-inv-img.empty {
+        opacity: 0.3;
+    }
+
+    .crate-inv-count {
+        position: absolute;
+        bottom: 4%;
+        right: 5%;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .crate-inv-tooltip {
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        z-index: 9999;
+        pointer-events: none;
+        min-width: 100px;
+    }
+
+    .crate-inv-tooltip-arrow {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+    }
 </style>
+
+
+{# ============================================================ #}
+{#                     SERIALISE TO JS                          #}
+{# ============================================================ #}
 
 <script>
 (function () {
 
-    const CRATES = {
-        {% for name, c in crates %}
+    const THEMES = {
+        {% for name, t in themes %}
         {{ name }}: {
-            theme:               {{ c.theme|json_encode|raw }},
-            emptySlot:           {{ c.empty_slot ? c.empty_slot|json_encode|raw : 'null' }},
-            colorBgPanel:        {{ c.color_bg_panel ? c.color_bg_panel|json_encode|raw : 'null' }},
-            colorBgCell:         {{ c.color_bg_cell ? c.color_bg_cell|json_encode|raw : 'null' }},
-            colorBgCellHover:    {{ c.color_bg_cell_hover ? c.color_bg_cell_hover|json_encode|raw : 'null' }},
-            colorBgTooltip:      {{ c.color_bg_tooltip ? c.color_bg_tooltip|json_encode|raw : 'null' }},
-            colorTextTooltip:    {{ c.color_text_tooltip ? c.color_text_tooltip|json_encode|raw : 'null' }},
-            colorBorderCell:     {{ c.color_border_cell ? c.color_border_cell|json_encode|raw : 'null' }},
-            colorBorderTooltip:  {{ c.color_border_tooltip ? c.color_border_tooltip|json_encode|raw : 'null' }},
-            colorTextCount:      {{ c.color_text_count ? c.color_text_count|json_encode|raw : 'null' }},
-            items:               {{ c.items|json_encode|raw }},
+            fontUrl:            {{ t.font_url|json_encode|raw }},
+            fontFamily:         {{ t.font_family|json_encode|raw }},
+            panelBg:            {{ t.panel_bg|json_encode|raw }},
+            panelPadding:       {{ t.panel_padding|json_encode|raw }},
+            panelRadius:        {{ t.panel_radius|json_encode|raw }},
+            panelShadow:        {{ t.panel_shadow|json_encode|raw }},
+            panelBorderTop:     {{ t.panel_border_top|json_encode|raw }},
+            panelBorderLeft:    {{ t.panel_border_left|json_encode|raw }},
+            panelBorderRight:   {{ t.panel_border_right|json_encode|raw }},
+            panelBorderBottom:  {{ t.panel_border_bottom|json_encode|raw }},
+            cellSize:           {{ t.cell_size|json_encode|raw }},
+            cellGap:            {{ t.cell_gap|json_encode|raw }},
+            cellBg:             {{ t.cell_bg|json_encode|raw }},
+            cellHoverBg:        {{ t.cell_hover_bg|json_encode|raw }},
+            cellHoverTransform: {{ t.cell_hover_transform|json_encode|raw }},
+            cellHoverShadow:    {{ t.cell_hover_shadow|json_encode|raw }},
+            cellRadius:         {{ t.cell_radius|json_encode|raw }},
+            cellBorderTop:      {{ t.cell_border_top|json_encode|raw }},
+            cellBorderLeft:     {{ t.cell_border_left|json_encode|raw }},
+            cellBorderRight:    {{ t.cell_border_right|json_encode|raw }},
+            cellBorderBottom:   {{ t.cell_border_bottom|json_encode|raw }},
+            imgSize:            {{ t.img_size|json_encode|raw }},
+            imgSizeRatio:       {{ t.img_size_ratio|json_encode|raw }},
+            countSize:          {{ t.count_size|json_encode|raw }},
+            countWeight:        {{ t.count_weight|json_encode|raw }},
+            countColor:         {{ t.count_color|json_encode|raw }},
+            countShadow:        {{ t.count_shadow|json_encode|raw }},
+            tooltipBg:          {{ t.tooltip_bg|json_encode|raw }},
+            tooltipBorderWidth: {{ t.tooltip_border_width|json_encode|raw }},
+            tooltipBorderStyle: {{ t.tooltip_border_style|json_encode|raw }},
+            tooltipBorderColor: {{ t.tooltip_border_color|json_encode|raw }},
+            tooltipRadius:      {{ t.tooltip_radius|json_encode|raw }},
+            tooltipPadding:     {{ t.tooltip_padding|json_encode|raw }},
+            tooltipShadow:      {{ t.tooltip_shadow|json_encode|raw }},
+            tooltipText:        {{ t.tooltip_text|json_encode|raw }},
+            tooltipLoreColor:   {{ t.tooltip_lore_color|json_encode|raw }},
+            tooltipDescColor:   {{ t.tooltip_desc_color|json_encode|raw }},
+            tooltipSize:        {{ t.tooltip_size|json_encode|raw }},
+            tooltipWeight:      {{ t.tooltip_weight|json_encode|raw }},
+            tooltipTextShadow:  {{ t.tooltip_text_shadow|json_encode|raw }},
+            tooltipTracking:    {{ t.tooltip_tracking|json_encode|raw }},
+            itemsPerRow:        {{ t.items_per_row }},
         },
         {% endfor %}
     };
 
-    const THEMES = {
-        minecraft: {
-            fontUrl:            'https://fonts.googleapis.com/css2?family=VT323&display=swap',
-            fontFamily:         "'VT323', monospace",
-            panelBg:            '#c6c6c6',
-            panelBorderTop:     '3px solid #ffffff',
-            panelBorderLeft:    '3px solid #ffffff',
-            panelBorderRight:   '3px solid #555555',
-            panelBorderBottom:  '3px solid #555555',
-            panelPadding:       '14px 16px 16px',
-            panelShadow:        '3px 3px 0 #000, inset -1px -1px 0 #888, inset 1px 1px 0 #fff',
-            panelRadius:        '0px',
-            cellSize:           '40px',
-            cellGap:            '4px',
-            cellBg:             '#8b8b8b',
-            cellHoverBg:        '#9f9f9f',
-            cellHoverTransform: 'none',
-            cellHoverShadow:    'none',
-            cellBorderTop:      '2px solid #373737',
-            cellBorderLeft:     '2px solid #373737',
-            cellBorderRight:    '2px solid #ffffff',
-            cellBorderBottom:   '2px solid #ffffff',
-            cellRadius:         '0px',
-            imgSize:            '28px',
-            countSize:          '13px',
-            countWeight:        '400',
-            countColor:         '#ffffff',
-            countShadow:        '1px 1px 0 #3f3f3f',
-            tooltipBg:          '#100010',
-            tooltipBorder:      '1px solid #2d0a63',
-            tooltipText:        '#ffffff',
-            tooltipLoreColor:   '#aa88ff',
-            tooltipDescColor:   '#aaaaaa',
-            tooltipSize:        '14px',
-            tooltipWeight:      '400',
-            tooltipPadding:     '6px 8px',
-            tooltipTextShadow:  '1px 1px 0 #5a0060',
-            tooltipShadow:      '2px 2px 0 #000',
-            tooltipRadius:      '0px',
-            tooltipTracking:    '0px',
-            tooltipArrow:       '#2d0a63',
-            itemsPerRow:        7,
+    const CRATES = {
+        {% for name, c in crates %}
+        {{ name }}: {
+            theme:                      {{ c.theme|json_encode|raw }},
+            emptySlot:                  {{ c.empty_slot ? c.empty_slot|json_encode|raw : 'null' }},
+            colorBgPanel:               {{ c.color_bg_panel ? c.color_bg_panel|json_encode|raw : 'null' }},
+            colorBgCell:                {{ c.color_bg_cell ? c.color_bg_cell|json_encode|raw : 'null' }},
+            colorBgCellHover:           {{ c.color_bg_cell_hover ? c.color_bg_cell_hover|json_encode|raw : 'null' }},
+            colorBgTooltip:             {{ c.color_bg_tooltip ? c.color_bg_tooltip|json_encode|raw : 'null' }},
+            colorTextTooltip:           {{ c.color_text_tooltip ? c.color_text_tooltip|json_encode|raw : 'null' }},
+            colorBorderCell:            {{ c.color_border_cell ? c.color_border_cell|json_encode|raw : 'null' }},
+            colorBorderTooltip:         {{ c.color_border_tooltip ? c.color_border_tooltip|json_encode|raw : 'null' }},
+            colorTextCount:             {{ c.color_text_count ? c.color_text_count|json_encode|raw : 'null' }},
+            overrideCellSize:           {{ c.override_cell_size is defined and c.override_cell_size ? c.override_cell_size|json_encode|raw : 'null' }},
+            overrideCellGap:            {{ c.override_cell_gap is defined and c.override_cell_gap ? c.override_cell_gap|json_encode|raw : 'null' }},
+            overrideCellRadius:         {{ c.override_cell_radius is defined and c.override_cell_radius ? c.override_cell_radius|json_encode|raw : 'null' }},
+            overrideCellBorderWidth:    {{ c.override_cell_border_width is defined and c.override_cell_border_width ? c.override_cell_border_width|json_encode|raw : 'null' }},
+            overridePanelRadius:        {{ c.override_panel_radius is defined and c.override_panel_radius ? c.override_panel_radius|json_encode|raw : 'null' }},
+            overridePanelPadding:       {{ c.override_panel_padding is defined and c.override_panel_padding ? c.override_panel_padding|json_encode|raw : 'null' }},
+            overrideImgSizeRatio:       {{ c.override_img_size_ratio is defined and c.override_img_size_ratio ? c.override_img_size_ratio|json_encode|raw : 'null' }},
+            overrideTooltipRadius:      {{ c.override_tooltip_radius is defined and c.override_tooltip_radius ? c.override_tooltip_radius|json_encode|raw : 'null' }},
+            overrideTooltipBorderWidth: {{ c.override_tooltip_border_width is defined and c.override_tooltip_border_width ? c.override_tooltip_border_width|json_encode|raw : 'null' }},
+            overrideItemsPerRow:        {{ c.override_items_per_row is defined and c.override_items_per_row ? c.override_items_per_row : 'null' }},
+            items:                      {{ c.items|json_encode|raw }},
         },
-        sleek: {
-            fontUrl:            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap',
-            fontFamily:         "'Inter', sans-serif",
-            panelBg:            '#1e293b',
-            panelBorderTop:     '1px solid #334155',
-            panelBorderLeft:    '1px solid #334155',
-            panelBorderRight:   '1px solid #334155',
-            panelBorderBottom:  '1px solid #334155',
-            panelPadding:       '20px',
-            panelShadow:        '0 25px 50px rgba(0,0,0,0.6)',
-            panelRadius:        '16px',
-            cellSize:           '44px',
-            cellGap:            '6px',
-            cellBg:             '#0f172a',
-            cellHoverBg:        '#1e3a5f',
-            cellHoverTransform: 'scale(1.05)',
-            cellHoverShadow:    '0 4px 12px rgba(0,0,0,0.4)',
-            cellBorderTop:      '1px solid #334155',
-            cellBorderLeft:     '1px solid #334155',
-            cellBorderRight:    '1px solid #334155',
-            cellBorderBottom:   '1px solid #334155',
-            cellRadius:         '8px',
-            imgSize:            '30px',
-            countSize:          '11px',
-            countWeight:        '600',
-            countColor:         '#94a3b8',
-            countShadow:        'none',
-            tooltipBg:          '#1e293b',
-            tooltipBorder:      '1px solid #475569',
-            tooltipText:        '#f1f5f9',
-            tooltipLoreColor:   '#a78bfa',
-            tooltipDescColor:   '#64748b',
-            tooltipSize:        '12px',
-            tooltipWeight:      '500',
-            tooltipPadding:     '8px 12px',
-            tooltipTextShadow:  'none',
-            tooltipShadow:      '0 8px 24px rgba(0,0,0,0.5)',
-            tooltipRadius:      '6px',
-            tooltipTracking:    '0.02em',
-            tooltipArrow:       '#475569',
-            itemsPerRow:        7,
-        },
+        {% endfor %}
     };
 
     const loadedFonts = new Set();
@@ -239,8 +382,8 @@
         if (loadedFonts.has(url)) return;
         loadedFonts.add(url);
         const link = document.createElement('link');
-        link.rel  = 'stylesheet';
-        link.href = url;
+        link.rel   = 'stylesheet';
+        link.href  = url;
         document.head.appendChild(link);
     }
 
@@ -253,7 +396,7 @@
                 const marker = '@' + attr + '="';
                 const start  = line.indexOf(marker);
                 if (start === -1) return '';
-                const vs = start + marker.length;
+                const vs  = start + marker.length;
                 const end = line.indexOf('"', vs);
                 return end === -1 ? '' : line.slice(vs, end);
             }
@@ -272,49 +415,94 @@
         return items;
     }
 
+    function resolveConfig(crate) {
+        const base = Object.assign({}, THEMES[crate.theme] || THEMES.sleek);
+
+        if (crate.colorBgPanel)        base.panelBg            = crate.colorBgPanel;
+        if (crate.colorBgCell)         base.cellBg             = crate.colorBgCell;
+        if (crate.colorBgCellHover)    base.cellHoverBg        = crate.colorBgCellHover;
+        if (crate.colorBgTooltip)      base.tooltipBg          = crate.colorBgTooltip;
+        if (crate.colorTextTooltip)    base.tooltipText        = crate.colorTextTooltip;
+        if (crate.colorTextCount)      base.countColor         = crate.colorTextCount;
+        if (crate.colorBorderTooltip)  base.tooltipBorderColor = crate.colorBorderTooltip;
+
+        if (crate.colorBorderCell) {
+            const b = crate.colorBorderCell;
+            const w = crate.overrideCellBorderWidth || '1px';
+            base.cellBorderTop    = `${w} solid ${b}`;
+            base.cellBorderLeft   = `${w} solid ${b}`;
+            base.cellBorderRight  = `${w} solid ${b}`;
+            base.cellBorderBottom = `${w} solid ${b}`;
+        }
+
+        if (crate.overrideCellSize)      base.cellSize      = crate.overrideCellSize;
+        if (crate.overrideCellGap)       base.cellGap       = crate.overrideCellGap;
+        if (crate.overrideCellRadius)    base.cellRadius    = crate.overrideCellRadius;
+        if (crate.overridePanelRadius)   base.panelRadius   = crate.overridePanelRadius;
+        if (crate.overridePanelPadding)  base.panelPadding  = crate.overridePanelPadding;
+        if (crate.overrideImgSizeRatio)  base.imgSizeRatio  = crate.overrideImgSizeRatio;
+        if (crate.overrideTooltipRadius) base.tooltipRadius = crate.overrideTooltipRadius;
+        if (crate.overrideItemsPerRow)   base.itemsPerRow   = crate.overrideItemsPerRow;
+
+        if (crate.overrideCellBorderWidth) {
+            const w  = crate.overrideCellBorderWidth;
+            const rb = (v) => v.replace(/^\d+(\.\d+)?px/, w);
+            base.cellBorderTop    = rb(base.cellBorderTop);
+            base.cellBorderLeft   = rb(base.cellBorderLeft);
+            base.cellBorderRight  = rb(base.cellBorderRight);
+            base.cellBorderBottom = rb(base.cellBorderBottom);
+        }
+
+        if (crate.overrideTooltipBorderWidth) base.tooltipBorderWidth = crate.overrideTooltipBorderWidth;
+
+        base.tooltipBorder = `${base.tooltipBorderWidth} ${base.tooltipBorderStyle} ${base.tooltipBorderColor}`;
+
+        return base;
+    }
+
     function buildCrateHTML(crateName) {
         const crate = CRATES[crateName];
         if (!crate) return null;
 
-        const t = THEMES[crate.theme] || THEMES.sleek;
+        const t           = resolveConfig(crate);
+        const API         = 'https://api.minecraftitems.xyz/api/item/';
+        const items       = parseItems(crate.items);
+        const cols        = t.itemsPerRow;
+        const numRows     = Math.ceil(items.length / cols);
+        const totalCols   = cols + 2;
+        const imgRatio    = parseFloat(t.imgSizeRatio) || 0.7;
+
+        // Gap expressed as a percentage of cell width for the flex layout.
+        // We use CSS gap on the grid rows/columns using a vw-like calc below,
+        // but since we can't know cell width at build time we use a ratio.
+        // Instead, gap is expressed as a fraction of cell size:
+        // cellGapRatio = gap / cellSize (from theme defaults, used for proportional gap)
+        const defaultCellPx = parseFloat(t.cellSize) || 44;
+        const defaultGapPx  = parseFloat(t.cellGap)  || 6;
+        const gapRatio      = defaultGapPx / defaultCellPx; // e.g. 6/44 ≈ 0.136
+
         loadFont(t.fontUrl);
 
-        const bgPanel      = crate.colorBgPanel      || t.panelBg;
-        const bgCell       = crate.colorBgCell       || t.cellBg;
-        const bgCellHover  = crate.colorBgCellHover  || t.cellHoverBg;
-        const bgTooltip    = crate.colorBgTooltip    || t.tooltipBg;
-        const textTooltip  = crate.colorTextTooltip  || t.tooltipText;
-        const textCount    = crate.colorTextCount    || t.countColor;
-
-        const borderCell       = crate.colorBorderCell ? '1px solid ' + crate.colorBorderCell : null;
-        const cellBorderTop    = borderCell || t.cellBorderTop;
-        const cellBorderLeft   = borderCell || t.cellBorderLeft;
-        const cellBorderRight  = borderCell || t.cellBorderRight;
-        const cellBorderBottom = borderCell || t.cellBorderBottom;
-        const tooltipBorder    = crate.colorBorderTooltip ? '1px solid ' + crate.colorBorderTooltip : t.tooltipBorder;
-        const tooltipArrow     = crate.colorBorderTooltip || t.tooltipArrow;
-
-        const items   = parseItems(crate.items);
-        const cols    = t.itemsPerRow;
-        const numRows = Math.ceil(items.length / cols);
-        const API     = 'https://api.minecraftitems.xyz/api/item/';
-
-        const cellStyle = (bg) => `
-            width:${t.cellSize};height:${t.cellSize};
-            background:${bg};
-            border-top:${cellBorderTop};border-left:${cellBorderLeft};
-            border-right:${cellBorderRight};border-bottom:${cellBorderBottom};
-            border-radius:${t.cellRadius};
-            box-sizing:border-box;display:flex;
-            align-items:center;justify-content:center;
-            position:relative;cursor:default;
-        `;
+        function cellStyle(bg, extra) {
+            return [
+                `background:${bg}`,
+                `border-top:${t.cellBorderTop}`,
+                `border-left:${t.cellBorderLeft}`,
+                `border-right:${t.cellBorderRight}`,
+                `border-bottom:${t.cellBorderBottom}`,
+                `border-radius:${t.cellRadius}`,
+                `box-sizing:border-box`,
+                `position:relative`,
+                `overflow:visible`,
+                extra || '',
+            ].join(';');
+        }
 
         function emptyCell() {
             const img = crate.emptySlot
-                ? `<img class="inv-item-img empty-slot-img" src="${API}${crate.emptySlot}" alt="" style="width:${t.imgSize};height:${t.imgSize};">`
+                ? `<img class="crate-inv-img empty" src="${API}${crate.emptySlot}" alt="" style="width:${imgRatio * 100}%;height:${imgRatio * 100}%;object-fit:contain;">`
                 : '';
-            return `<div style="${cellStyle(bgCell)}">${img}</div>`;
+            return `<div class="crate-inv-cell" style="${cellStyle(t.cellBg)}">${img}</div>`;
         }
 
         function itemCell(item) {
@@ -322,7 +510,7 @@
             const imgSrc = item.url ? item.url + glint : API + item.img + glint;
 
             const count = parseInt(item.quantity, 10) > 1
-                ? `<span style="position:absolute;bottom:2px;right:3px;font-size:${t.countSize};font-weight:${t.countWeight};color:${textCount};text-shadow:${t.countShadow};font-family:${t.fontFamily};line-height:1;pointer-events:none;">${item.quantity}</span>`
+                ? `<span class="crate-inv-count" style="font-size:0.3em;font-weight:${t.countWeight};color:${t.countColor};text-shadow:${t.countShadow};font-family:${t.fontFamily};">${item.quantity}</span>`
                 : '';
 
             const lore = item.lore
@@ -330,43 +518,52 @@
                 : '';
 
             const desc = item.desc
-                ? `<span style="display:block;white-space:pre;color:${t.tooltipDescColor};font-size:0.85em;margin-top:5px;border-top:1px solid ${tooltipArrow};padding-top:5px;">${item.desc}</span>`
+                ? `<span style="display:block;white-space:pre;color:${t.tooltipDescColor};font-size:0.85em;margin-top:5px;border-top:1px solid ${t.tooltipBorderColor};padding-top:5px;">${item.desc}</span>`
                 : '';
 
             const tooltip = `
-                <div class="inv-tooltip" style="
-                    background:${bgTooltip};border:${tooltipBorder};
-                    font-size:${t.tooltipSize};font-family:${t.fontFamily};
-                    font-weight:${t.tooltipWeight};padding:${t.tooltipPadding};
-                    box-shadow:${t.tooltipShadow};border-radius:${t.tooltipRadius};
-                    letter-spacing:${t.tooltipTracking};text-shadow:${t.tooltipTextShadow};
+                <div class="crate-inv-tooltip" style="
+                    background:${t.tooltipBg};
+                    border:${t.tooltipBorder};
+                    font-size:${t.tooltipSize};
+                    font-family:${t.fontFamily};
+                    font-weight:${t.tooltipWeight};
+                    padding:${t.tooltipPadding};
+                    box-shadow:${t.tooltipShadow};
+                    border-radius:${t.tooltipRadius};
+                    letter-spacing:${t.tooltipTracking};
+                    text-shadow:${t.tooltipTextShadow};
                 ">
-                    <span style="display:block;color:${textTooltip};font-weight:${t.tooltipWeight};">${item.name}</span>
+                    <span style="display:block;color:${t.tooltipText};font-weight:${t.tooltipWeight};">${item.name}</span>
                     ${lore}${desc}
-                    <span style="position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:${tooltipArrow};"></span>
+                    <span class="crate-inv-tooltip-arrow" style="border-top-color:${t.tooltipBorderColor};"></span>
                 </div>`;
 
             return `
-                <div class="inv-cell item-slot"
-                    style="${cellStyle(bgCell)}"
-                    onmouseenter="this.style.background='${bgCellHover}';this.style.transform='${t.cellHoverTransform}';this.style.boxShadow='${t.cellHoverShadow}';"
-                    onmouseleave="this.style.background='${bgCell}';this.style.transform='none';this.style.boxShadow='none';"
+                <div class="crate-inv-cell item-slot"
+                    style="${cellStyle(t.cellBg, 'cursor:pointer;transition:background 0.15s,transform 0.15s,box-shadow 0.15s;')}"
+                    onmouseenter="this.style.background='${t.cellHoverBg}';this.style.transform='${t.cellHoverTransform}';this.style.boxShadow='${t.cellHoverShadow}';"
+                    onmouseleave="this.style.background='${t.cellBg}';this.style.transform='none';this.style.boxShadow='none';"
                 >
-                    <img class="inv-item-img" src="${imgSrc}" alt="${item.name}" style="width:${t.imgSize};height:${t.imgSize};">
+                    <img class="crate-inv-img" src="${imgSrc}" alt="${item.name}" style="width:${imgRatio * 100}%;height:${imgRatio * 100}%;object-fit:contain;">
                     ${count}
                     ${tooltip}
                 </div>`;
         }
 
-        const rowStyle = `display:flex;gap:${t.cellGap};`;
+        // Gap between cells expressed as a percentage-based CSS calc.
+        // We want: gap = gapRatio * cellWidth, but cellWidth = (100% - gaps) / totalCols.
+        // This is tricky in pure CSS so we use a small gap % of the row width instead.
+        // gap% = gapRatio / (1 + gapRatio * totalCols) * 100  (approximate)
+        const gapPct = (gapRatio / (totalCols + gapRatio * (totalCols - 1)) * 100).toFixed(3);
+
+        const rowStyle = `display:flex;flex-direction:row;width:100%;gap:${gapPct}%;box-sizing:border-box;`;
         let rows = '';
 
-        // Top blank row
-        let top = '';
-        for (let i = 0; i < cols + 2; i++) top += emptyCell();
-        rows += `<div style="${rowStyle}">${top}</div>`;
+        let topRow = '';
+        for (let i = 0; i < totalCols; i++) topRow += emptyCell();
+        rows += `<div class="crate-inv-row" style="${rowStyle}margin-bottom:${gapPct}%;">${topRow}</div>`;
 
-        // Item rows
         for (let r = 0; r < numRows; r++) {
             let row = emptyCell();
             for (let c = 0; c < cols; c++) {
@@ -374,25 +571,33 @@
                 row += item ? itemCell(item) : emptyCell();
             }
             row += emptyCell();
-            rows += `<div style="${rowStyle}">${row}</div>`;
+            const isLast = r === numRows - 1;
+            rows += `<div class="crate-inv-row" style="${rowStyle}${!isLast ? `margin-bottom:${gapPct}%;` : ''}">${row}</div>`;
         }
 
-        // Bottom blank row
-        let bottom = '';
-        for (let i = 0; i < cols + 2; i++) bottom += emptyCell();
-        rows += `<div style="${rowStyle}">${bottom}</div>`;
+        let bottomRow = '';
+        for (let i = 0; i < totalCols; i++) bottomRow += emptyCell();
+        rows += `<div class="crate-inv-row" style="${rowStyle}margin-top:${gapPct}%;">${bottomRow}</div>`;
 
         return `
-            <div style="
-                display:inline-block;
-                background:${bgPanel};
-                border-top:${t.panelBorderTop};border-left:${t.panelBorderLeft};
-                border-right:${t.panelBorderRight};border-bottom:${t.panelBorderBottom};
-                padding:${t.panelPadding};box-shadow:${t.panelShadow};
-                border-radius:${t.panelRadius};font-family:${t.fontFamily};
-            ">
-                <div style="display:flex;flex-direction:column;gap:${t.cellGap};">
-                    ${rows}
+            <div class="crate-preview-outer">
+                <div class="crate-inv-panel" style="
+                    display:block;
+                    width:100%;
+                    box-sizing:border-box;
+                    background:${t.panelBg};
+                    border-top:${t.panelBorderTop};
+                    border-left:${t.panelBorderLeft};
+                    border-right:${t.panelBorderRight};
+                    border-bottom:${t.panelBorderBottom};
+                    padding:${t.panelPadding};
+                    box-shadow:${t.panelShadow};
+                    border-radius:${t.panelRadius};
+                    font-family:${t.fontFamily};
+                ">
+                    <div class="crate-inv-grid" style="display:flex;flex-direction:column;width:100%;box-sizing:border-box;">
+                        ${rows}
+                    </div>
                 </div>
             </div>`;
     }
@@ -404,7 +609,6 @@
         while ((node = walker.nextNode())) {
             if (node.nodeValue.includes('@crate-preview-builder:')) hits.push(node);
         }
-
         for (const textNode of hits) {
             const parts = textNode.nodeValue.split(/(@crate-preview-builder:[\w-]+)/g);
             const frag  = document.createDocumentFragment();
@@ -413,7 +617,9 @@
                 if (match) {
                     const html = buildCrateHTML(match[1]);
                     if (html) {
-                        const wrapper = document.createElement('span');
+                        const wrapper = document.createElement('div');
+                        wrapper.style.display = 'block';
+                        wrapper.style.width   = '100%';
                         wrapper.setAttribute('data-crate-preview', match[1]);
                         wrapper.innerHTML = html;
                         frag.appendChild(wrapper);
